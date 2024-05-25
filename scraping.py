@@ -6,15 +6,8 @@ import sqlite3
 import lxml
 from datetime import datetime
 
- #lineas para evitar error SSL   -->  SIEMPRE ASI 
-import os, ssl
-if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
-getattr(ssl, '_create_unverified_context', None)):
-    ssl._create_default_https_context = ssl._create_unverified_context
-    
 
 
-    
 # def cargar():
 #    respuesta = messagebox.askyesno(title="Confirmar",message="Esta seguro que quiere recargar los datos. \nEsta operaciÃ³n puede ser lenta")
 #    if respuesta:
@@ -32,7 +25,7 @@ def obtener_tamano(url_detalle):
     
     return tamano
 
-def extraer_datos():
+def extraer_datos_arcaDeNoe():
     url_principal_perros = "https://arcadenoe.org/listado_animales.php?id_seccion=25"
     url_principal_gatos = "https://arcadenoe.org/listado_animales.php?id_seccion=26"
     
@@ -82,8 +75,23 @@ def extraer_datos():
                 print('--------------------------------------')
             pagina += 1
 
-extraer_datos()
+#extraer_datos_arcaDeNoe()
 
+
+def extraer_datos_arcaSevilla():
+    url_principal = "https://arcasevilla.es/arca/"
+    req = urllib.request.Request(url_principal, headers={'User-Agent': 'Mozilla/5.0'})  #Al usar como agente mozilla deja 
+    f = urllib.request.urlopen(req)
+    s = BeautifulSoup(f, "lxml")
+
+    en_adopcion_item = s.find('li', {'id': 'menu-item-648'})
+    links = en_adopcion_item.find_all('a', href=True)[1:]  
+    descartes = ['machos', 'hembras', 'especiales','particulares']
+    for link in links:  ##SE HAN DESCARTADO PARTICULARES Y ESPECIALES
+        href = link['href']
+        if not any(palabra in href for palabra in descartes):
+            print(href)
+extraer_datos_arcaSevilla()
 
 
 
@@ -100,4 +108,3 @@ extraer_datos()
     
  
 
-extraer_datos()
