@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\benna\OneDrive\Escritorio\uni\year 6\cuatri2\AII\Ejercicios_AII_teoria\myenv"
+VIRTUAL_ENV="C:\Users\benna\OneDrive\Escritorio\uni\year 6\cuatri2\AII\Ejercicios_AII_teoria\pet_finder\myenv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

@@ -5,15 +5,14 @@ from tkinter import messagebox
 import sqlite3
 import lxml
 from datetime import datetime
-# lineas para evitar error SSL                          
-import os, ssl
-if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
-getattr(ssl, '_create_unverified_context', None)):
-    ssl._create_default_https_context = ssl._create_unverified_context
-    
 
 
 
+def extraer_datos_principal():
+    res = []
+    res.extend(extraer_datos_arcaDeNoe())
+    res.extend(extraer_datos_ciudadAnimal())
+    return res
 
 def obtener_tamano(url_detalle):
     f_detalle = urllib.request.urlopen(url_detalle)
@@ -62,7 +61,9 @@ def extraer_datos_arcaDeNoe():
                 # Remover los símbolos de género y reemplazarlos con "Hembra" o "Macho"
                 genero = genero_raw.replace("♂", "").replace("♀", "").strip()
 
-                edad = tarjeta.find('p', class_='car_listado-edad').strong.next_sibling.strip()
+                edad1 = tarjeta.find('p', class_='car_listado-edad').strong.next_sibling.strip()
+                edad = int(edad1.split()[0])
+
                 foto = tarjeta.find('img')['src']
                 url_foto=urllib.parse.urljoin(dominio_base, foto)
 
@@ -175,9 +176,9 @@ def detalles_mascotas(url,lista_detalles):
                      raza = "N/A"
             elif texto.startswith("- FECHA DE NACIMIENTO:"):
                 fecha_nacimiento = detalle.find_next('span', style="color: #000000;").get_text(strip=True)
-                edad = calcular_edad(fecha_nacimiento)
-                if edad == "" :
-                     edad = "N/A"
+                edad = calcular_edad(fecha_nacimiento) if edad != "N/A" else 0 
+
+
                
             elif texto.startswith("- MEDIDAS"):
                 tamaño = detalle.find_next('span', style="color: #000000;").get_text(strip=True)
@@ -252,178 +253,12 @@ def calcular_edad(fecha_nacimiento):
     except ValueError:
         # Si falla, intenta analizar solo el año
         fecha_nacimiento = datetime.strptime(fecha_nacimiento, '%Y')
-        # Calcula la edad solo con el año
-        años = datetime.now().year - fecha_nacimiento.year
-        return f"{años} años"
     else:
         fecha_actual = datetime.now()
         diferencia = fecha_actual - fecha_nacimiento
         años = diferencia.days // 365
-        meses = (diferencia.days % 365) // 30
-        return f"{años} años y {meses} meses"
-
-
-
+        return años
    
-print(extraer_datos_arcaDeNoe())
-#print(extraer_datos_ciudadAnimal())
 
-        
-   
-# def almacenar_bd():
-#     conn = sqlite3.connect('animales.db')
-#     conn.text_factory = str
-#     conn.execute("DROP TABLE IF EXISTS ANIMALES")
-#     conn.execute('''CREATE TABLE ANIMALES
-#         (NOMBRE TEXT NOT NULL,
-#         TIPO TEXT,
-#         GENERO TEXT,
-#         RAZA TEXT,
-#         EDAD TEXT,
-#         TAMANO TEXT,
-#         FOTO_URL TEXT,
-#         URL_ORIGEN TEXT);''')
 
-#     datos_arcaDeNoe = extraer_datos_arcaDeNoe()
-#     datos_ciudadAnimal = extraer_datos_ciudadAnimal()
-#     todos_datos = datos_arcaDeNoe + datos_ciudadAnimal
-
-#     for animal in todos_datos:
-#         conn.execute("""INSERT INTO ANIMALES (NOMBRE, TIPO, GENERO, RAZA, EDAD, TAMANO, FOTO_URL, URL_ORIGEN) VALUES (?,?,?,?,?,?,?,?)""",
-#                      animal)
-#     conn.commit()
-    
-#     cursor = conn.execute("SELECT COUNT(*) FROM ANIMALES")
-#     messagebox.showinfo("Base Datos",
-#                         "Base de datos creada correctamente \nHay " + str(cursor.fetchone()[0]) + " animales.")
-#     conn.close()
-
-# Ejecutar la función para extraer y almacenar los datos
-# almacenar_bd()
-   
-  
-    
-    # #LINK PAGINA 2: 
-# def extraer_datos_arcaSevilla():
-#     url_principal = "https://arcasevilla.es/arca/"
-#     req = urllib.request.Request(url_principal, headers={'User-Agent': 'Mozilla/5.0'})  #Al usar como agente mozilla deja 
-#     f = urllib.request.urlopen(req)
-#     s = BeautifulSoup(f, "lxml")
-
-#     en_adopcion_item = s.find('li', {'id': 'menu-item-648'})
-#     links = en_adopcion_item.find_all('a', href=True)[1:]  
-#     descartes = ['machos', 'hembras', 'especiales','particulares']
-#     for link in links:  ##SE HAN DESCARTADO PARTICULARES Y ESPECIALES
-#         href = link['href']
-#         if not any(palabra in href for palabra in descartes):
-#             extraer_animales(href)
-
-# def extraer_animales(enlace):
-#     req = urllib.request.Request(enlace, headers={'User-Agent': 'Mozilla/5.0'})
-#     f = urllib.request.urlopen(req)
-#     s = BeautifulSoup(f, "lxml")
-#     div_content = s.find('div', class_='entry-content-wrapper')
-#     animales_divs = div_content.find_all('div', class_='flex_cell')  #col de izquierda y col de derecha 
-#     for animal_div in animales_divs:
-#         animales_img = animal_div.find_all('a', class_='grid-image')
-#         for animal in animales_img:
-#             nombre = animal['title']
-
-#             print("Nombre: ", nombre)
-
-#             enlace_url = animal['href']
-            
-#             detalles_animales(enlace_url)
-
-# def detalles_animales(enlace):
-#     req = urllib.request.Request(enlace, headers={'User-Agent': 'Mozilla/5.0'})
-#     f = urllib.request.urlopen(req)
-#     s = BeautifulSoup(f, "lxml")
-    
-#     detalles_div = s.find('div', class_='entry-content-wrapper clearfix')
-#     detalles = detalles_div.find_all('li')
-#     for detalle in detalles:
-#         if 'Sexo' in detalle.text:
-#             detalle.string.replace_with('Género: ' + detalle.text.split(': ')[1])
-#         print(detalle.text.strip())           
-# #extraer_datos_arcaSevilla()
-
-        
-   
-# def almacenar_bd():
-#     conn = sqlite3.connect('animales.db')
-#     conn.text_factory = str
-#     conn.execute("DROP TABLE IF EXISTS ANIMALES")
-#     conn.execute('''CREATE TABLE ANIMALES
-#         (NOMBRE TEXT NOT NULL,
-#         TIPO TEXT,
-#         GENERO TEXT,
-#         RAZA TEXT,
-#         EDAD TEXT,
-#         TAMANO TEXT,
-#         FOTO_URL TEXT,
-#         URL_ORIGEN TEXT);''')
-
-#     datos_arcaDeNoe = extraer_datos_arcaDeNoe()
-#     datos_ciudadAnimal = extraer_datos_ciudadAnimal()
-#     todos_datos = datos_arcaDeNoe + datos_ciudadAnimal
-
-#     for animal in todos_datos:
-#         conn.execute("""INSERT INTO ANIMALES (NOMBRE, TIPO, GENERO, RAZA, EDAD, TAMANO, FOTO_URL, URL_ORIGEN) VALUES (?,?,?,?,?,?,?,?)""",
-#                      animal)
-#     conn.commit()
-    
-#     cursor = conn.execute("SELECT COUNT(*) FROM ANIMALES")
-#     messagebox.showinfo("Base Datos",
-#                         "Base de datos creada correctamente \nHay " + str(cursor.fetchone()[0]) + " animales.")
-#     conn.close()
-
-# Ejecutar la función para extraer y almacenar los datos
-# almacenar_bd()
-   
-  
-    
-    # #LINK PAGINA 2: 
-# def extraer_datos_arcaSevilla():
-#     url_principal = "https://arcasevilla.es/arca/"
-#     req = urllib.request.Request(url_principal, headers={'User-Agent': 'Mozilla/5.0'})  #Al usar como agente mozilla deja 
-#     f = urllib.request.urlopen(req)
-#     s = BeautifulSoup(f, "lxml")
-
-#     en_adopcion_item = s.find('li', {'id': 'menu-item-648'})
-#     links = en_adopcion_item.find_all('a', href=True)[1:]  
-#     descartes = ['machos', 'hembras', 'especiales','particulares']
-#     for link in links:  ##SE HAN DESCARTADO PARTICULARES Y ESPECIALES
-#         href = link['href']
-#         if not any(palabra in href for palabra in descartes):
-#             extraer_animales(href)
-
-# def extraer_animales(enlace):
-#     req = urllib.request.Request(enlace, headers={'User-Agent': 'Mozilla/5.0'})
-#     f = urllib.request.urlopen(req)
-#     s = BeautifulSoup(f, "lxml")
-#     div_content = s.find('div', class_='entry-content-wrapper')
-#     animales_divs = div_content.find_all('div', class_='flex_cell')  #col de izquierda y col de derecha 
-#     for animal_div in animales_divs:
-#         animales_img = animal_div.find_all('a', class_='grid-image')
-#         for animal in animales_img:
-#             nombre = animal['title']
-
-#             print("Nombre: ", nombre)
-
-#             enlace_url = animal['href']
-            
-#             detalles_animales(enlace_url)
-
-# def detalles_animales(enlace):
-#     req = urllib.request.Request(enlace, headers={'User-Agent': 'Mozilla/5.0'})
-#     f = urllib.request.urlopen(req)
-#     s = BeautifulSoup(f, "lxml")
-    
-#     detalles_div = s.find('div', class_='entry-content-wrapper clearfix')
-#     detalles = detalles_div.find_all('li')
-#     for detalle in detalles:
-#         if 'Sexo' in detalle.text:
-#             detalle.string.replace_with('Género: ' + detalle.text.split(': ')[1])
-#         print(detalle.text.strip())           
-# #extraer_datos_arcaSevilla()
+# print(extraer_datos_principal())
