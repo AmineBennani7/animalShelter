@@ -260,5 +260,4 @@ def calcular_edad(fecha_nacimiento):
         return años
    
 
-
-# print(extraer_datos_principal())
+print(extraer_datos_principal())

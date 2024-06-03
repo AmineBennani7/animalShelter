@@ -1,0 +1,51 @@
+{% extends 'animales/base.html' %}
+
+{% block title %}Buscar por Tipo y Tamaño{% endblock %}
+
+{% block content %}
+<h2>Buscar por Tipo y Tamaño</h2>
+<form method="get" action="{% url 'buscar_tipo_tamano' %}" class="mb-4">
+    <div class="form-group">
+        <label for="tipo">Tipo:</label>
+        <select id="tipo" name="tipo" class="form-control">
+            <option value="Perro">Perro</option>
+            <option value="Gato">Gato</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="tamano">Tamaño:</label>
+        <select id="tamano" name="tamano" class="form-control">
+            <option value="">Cualquiera</option>
+            {% for tamano in tamanos %}
+                <option value="{{ tamano }}" {% if tamano == tamano_seleccionado %}selected{% endif %}>{{ tamano }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Buscar</button>
+</form>
+
+{% if animales %}
+<div class="row">
+    {% for animal in animales %}
+    <div class="col-md-4">
+        <div class="card mb-4 shadow-sm">
+            <img class="card-img-top" src="{{ animal.url_foto }}" alt="{{ animal.nombre }}">
+            <div class="card-body">
+                <h5 class="card-title">{{ animal.nombre }}</h5>
+                <p class="card-text">Tipo: {{ animal.tipo }}</p>
+                <p class="card-text">Género: {{ animal.genero }}</p>
+                <p class="card-text">Raza: {{ animal.raza }}</p>
+                <p class="card-text">Edad: {{ animal.edad }}</p>
+                <p class="card-text">Tamaño: {{ animal.tamano }}</p>
+                <a href="{{ animal.url_detalle }}" class="btn btn-primary">Ver Detalles</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p>No se encontraron animales.</p>
+{% endif %}
+{% endblock %}
+
+

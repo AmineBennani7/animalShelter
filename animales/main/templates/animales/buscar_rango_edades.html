@@ -1,0 +1,41 @@
+{% extends 'animales/base.html' %}
+
+{% block title %}Buscar por Rango de Edades{% endblock %}
+
+{% block content %}
+<h2>Buscar por Rango de Edades</h2>
+<form method="get" action="{% url 'buscar_rango_edades' %}" class="mb-4">
+    <div class="form-group">
+        <label for="edad_min">Edad Mínima:</label>
+        <input type="number" id="edad_min" name="edad_min" min="0" class="form-control">
+    </div>
+    <div class="form-group">
+        <label for="edad_max">Edad Máxima:</label>
+        <input type="number" id="edad_max" name="edad_max" min="0" class="form-control">
+    </div>
+    <button type="submit" class="btn btn-primary">Buscar</button>
+</form>
+
+{% if animales %}
+<div class="row">
+    {% for animal in animales %}
+    <div class="col-md-4">
+        <div class="card mb-4 shadow-sm">
+            <img class="card-img-top" src="{{ animal.url_foto }}" alt="{{ animal.nombre }}">
+            <div class="card-body">
+                <h5 class="card-title">{{ animal.nombre }}</h5>
+                <p class="card-text">Tipo: {{ animal.tipo }}</p>
+                <p class="card-text">Género: {{ animal.genero }}</p>
+                <p class="card-text">Raza: {{ animal.raza }}</p>
+                <p class="card-text">Edad: {{ animal.edad }}</p>
+                <p class="card-text">Tamaño: {{ animal.tamano }}</p>
+                <a href="{{ animal.url_detalle }}" class="btn btn-primary">Ver Detalles</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p>No se encontraron animales.</p>
+{% endif %}
+{% endblock %}

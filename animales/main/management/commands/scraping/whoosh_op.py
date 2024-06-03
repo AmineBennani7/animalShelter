@@ -7,9 +7,9 @@ from whoosh.index import create_in, open_dir
 from whoosh.fields import Schema, TEXT, ID, NUMERIC
 from whoosh.qparser import QueryParser, MultifieldParser
 from whoosh import query
-from scraping import extraer_datos_principal
+from scraping.scraping import extraer_datos_principal
 from whoosh import qparser, index, query
-from whoosh.query import NumericRange
+from whoosh.query import Every, And, Term, NumericRange
 
 # Asegurando que SSL funcione correctamente
 if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
@@ -278,7 +278,76 @@ def buscar_por_rango_edades():
     b = Button(v, text="Buscar", command=mostrar_lista)
     b.pack(side=LEFT)
 
+def buscar_avanzado():
+    def mostrar_lista():
+        ix = open_dir("Index")
+        with ix.searcher() as searcher:
+            conditions = []
 
+            # Construye la consulta, ahora con todo en minúsculas
+            if tipo_var.get():
+                conditions.append(Term("tipo", tipo_var.get().lower()))
+
+            if genero_var.get():
+                conditions.append(Term("genero", genero_var.get().lower()))
+
+            if raza_var.get():
+                conditions.append(Term("raza", raza_var.get().lower()))
+
+            if edad_min_var.get() and edad_max_var.get():
+                conditions.append(NumericRange("edad", int(edad_min_var.get()), int(edad_max_var.get())))
+
+            if tamano_var.get():
+                conditions.append(Term("tamano", tamano_var.get().lower()))
+
+            # Crear la consulta combinada
+            if conditions:
+                query = And(conditions)
+            else:
+                query = Every()
+
+            results = searcher.search(query, limit=None)
+            imprimir_lista(results)
+
+    v = Toplevel()
+    v.title("Búsqueda personalizada: No tienes que rellenar todos los campos")
+
+    Label(v, text="Tipo:").pack(side=LEFT)
+    tipo_var = StringVar()
+    tipo_spinbox = Spinbox(v, values=["", "Perro", "Gato"], textvariable=tipo_var, state="readonly")
+    tipo_spinbox.pack(side=LEFT)
+
+    Label(v, text="Género:").pack(side=LEFT)
+    genero_var = StringVar()
+    genero_spinbox = Spinbox(v, values=["", "Macho", "Hembra"], textvariable=genero_var, state="readonly")
+    genero_spinbox.pack(side=LEFT)
+
+    Label(v, text="Raza:").pack(side=LEFT)
+    raza_var = StringVar()
+    Entry(v, textvariable=raza_var).pack(side=LEFT)
+
+    Label(v, text="Edad mínima:").pack(side=LEFT)
+    edad_min_var = StringVar()
+    Entry(v, textvariable=edad_min_var).pack(side=LEFT)
+
+    Label(v, text="Edad máxima:").pack(side=LEFT)
+    edad_max_var = StringVar()
+    Entry(v, textvariable=edad_max_var).pack(side=LEFT)
+
+    Label(v, text="Tamaño:").pack(side=LEFT)
+    tamano_var = StringVar()
+    ix = open_dir("Index")
+    with ix.searcher() as searcher:
+        lista_tamanos = [""]
+        lista_tamanos.extend([size.decode('utf-8') for size in searcher.lexicon('tamano')])
+
+
+
+
+    tamano_spinbox = Spinbox(v, values=lista_tamanos, textvariable=tamano_var, state="readonly")
+    tamano_spinbox.pack(side=LEFT)
+
+    Button(v, text="Buscar", command=mostrar_lista).pack(side=LEFT)
 
 
 
@@ -321,6 +390,11 @@ def ventana_principal():
 
     
     menubar.add_cascade(label="Buscar", menu=buscarmenu)
+
+    menubar.add_command(label="Búsqueda Personalizada", command=buscar_avanzado)
+
+
+
         
     root.config(menu=menubar)
     root.mainloop()
@@ -328,22 +402,6 @@ def ventana_principal():
 
 
 
-# def imprimir_edades():
-#     ix = open_dir("Index")
-#     with ix.searcher() as searcher:
-#         # Obtener todos los documentos en el índice
-#         documents = searcher.documents()
-#         # Recorrer todos los documentos
-#         for doc in documents:
-#             # Extraer la edad del documento
-#             edad_str = doc.get("edad", "")
-#             # Si la edad es "Desconocido", asignar 0
-#             if not edad_str or edad_str == "Desconocido":
-#                 edad_numero = 0
-#             else:
-#                 # Parsear la edad y obtener solo el número de años
-#                 edad_numero = parsear_edad(edad_str)
-#                 print(edad_numero)
 
 
 
@@ -351,4 +409,3 @@ if __name__ == "__main__":
     ventana_principal()
 
 
-# Ejemplo de uso

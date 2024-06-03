@@ -1,0 +1,36 @@
+{% extends 'animales/base.html' %}
+{% block title %}Buscar por Nombre o Raza{% endblock %}
+{% block content %}
+<h2>Buscar por Nombre o Raza</h2>
+<form method="get" action="{% url 'buscar_nombre_raza' %}" class="mb-4">
+    <div class="input-group">
+        <input type="text" name="query" class="form-control" placeholder="Buscar por Nombre o Raza">
+        <div class="input-group-append">
+            <button type="submit" class="btn btn-primary">Buscar</button>
+        </div>
+    </div>
+</form>
+
+{% if animales %}
+<div class="row">
+    {% for animal in animales %}
+    <div class="col-md-4">
+        <div class="card mb-4 shadow-sm">
+            <img class="card-img-top" src="{{ animal.url_foto }}" alt="{{ animal.nombre }}">
+            <div class="card-body">
+                <h5 class="card-title">{{ animal.nombre }}</h5>
+                <p class="card-text">Tipo: {{ animal.tipo }}</p>
+                <p class="card-text">Género: {{ animal.genero }}</p>
+                <p class="card-text">Raza: {{ animal.raza }}</p>
+                <p class="card-text">Edad: {{ animal.edad }}</p>
+                <p class="card-text">Tamaño: {{ animal.tamano }}</p>
+                <a href="{{ animal.url_detalle }}" class="btn btn-primary">Ver Detalles</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p>No se encontraron animales.</p>
+{% endif %}
+{% endblock %}
