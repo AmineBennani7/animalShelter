@@ -251,13 +251,15 @@ def calcular_edad(fecha_nacimiento):
         # Intenta analizar la fecha completa
         fecha_nacimiento = datetime.strptime(fecha_nacimiento, '%d.%m.%Y')
     except ValueError:
-        # Si falla, intenta analizar solo el año
-        fecha_nacimiento = datetime.strptime(fecha_nacimiento, '%Y')
-    else:
-        fecha_actual = datetime.now()
-        diferencia = fecha_actual - fecha_nacimiento
-        años = diferencia.days // 365
-        return años
+        try:
+            # Si falla, intenta analizar solo el año
+            fecha_nacimiento = datetime.strptime(fecha_nacimiento, '%b %Y')
+        except ValueError:
+            # Si falla nuevamente, devuelve 0
+            return 0
+    fecha_actual = datetime.now()
+    diferencia = fecha_actual - fecha_nacimiento
+    años = diferencia.days // 365
+    return años
    
 
-print(extraer_datos_principal())

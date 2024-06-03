@@ -7,7 +7,10 @@ def index(request):
 
 def listar_todo(request):
     animales = Animal.objects.all()
-    return render(request, 'animales/lista_animales.html', {'animales': animales})
+    animales_unicos = eliminar_duplicados(animales)
+
+    
+    return render(request, 'animales/lista_animales.html', {'animales': animales_unicos})
 
 
 def buscar_nombre_raza(request):
@@ -28,9 +31,7 @@ def buscar_nombre_raza(request):
 
     return render(request, 'animales/buscar_nombre_raza.html', {'animales': animales_unicos})
 
-from django.db.models import Q
-from django.shortcuts import render
-from .models import Animal
+
 
 def eliminar_duplicados(animales):
     # Crear un diccionario para eliminar duplicados basados en url_detalle

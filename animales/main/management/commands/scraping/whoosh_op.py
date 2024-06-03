@@ -7,7 +7,7 @@ from whoosh.index import create_in, open_dir
 from whoosh.fields import Schema, TEXT, ID, NUMERIC
 from whoosh.qparser import QueryParser, MultifieldParser
 from whoosh import query
-from scraping.scraping import extraer_datos_principal
+from scraping import extraer_datos_principal
 from whoosh import qparser, index, query
 from whoosh.query import Every, And, Term, NumericRange
 

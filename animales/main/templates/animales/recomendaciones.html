@@ -1,0 +1,34 @@
+{% extends 'animales/base.html' %}
+
+{% block title %}Recomendaciones de Animales{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1 class="mt-5">Recomendaciones para {{ animal_seleccionado.nombre }}</h1>
+    <div class="row mt-3">
+        {% if recomendaciones %}
+            {% for similitud, animal in recomendaciones %}
+            <div class="col-md-6">
+                <div class="card">
+                    <img src="{{ animal.url_foto }}" class="card-img-top" alt="Foto de {{ animal.nombre }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ animal.nombre }}</h5>
+                        <p class="card-text">
+                            <strong>Tipo:</strong> {{ animal.tipo }}<br>
+                            <strong>Género:</strong> {{ animal.genero }}<br>
+                            <strong>Raza:</strong> {{ animal.raza }}<br>
+                            <strong>Edad:</strong> {{ animal.edad }} años<br>
+                            <strong>Tamaño:</strong> {{ animal.tamano }}<br>
+                            <strong>Similitud:</strong> {{ similitud }}
+                        </p>
+                        <a href="{{ animal.url_detalle }}" class="btn btn-primary">Ver Detalles</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No se encontraron recomendaciones.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
