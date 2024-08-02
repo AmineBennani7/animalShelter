@@ -16,6 +16,8 @@ if (not os.environ.get('PYTHONHTTPSVERIFY', '') and
         getattr(ssl, '_create_unverified_context', None)):
     ssl._create_default_https_context = ssl._create_unverified_context
 
+
+
 def cargar():
     if index.exists_in("Index"):
         respuesta = messagebox.askyesno(title="Confirmar", message="El índice ya existe. \n¿Está seguro que quiere recargar los datos?. \nEsta operación puede ser lenta")
@@ -35,6 +37,7 @@ def almacenar_datos():
         url_foto=ID(stored=True),
         url_detalle=ID(stored=True)
     )
+    
 
     # Eliminamos el directorio del índice, si existe
     if os.path.exists("Index"):
@@ -406,6 +409,7 @@ def ventana_principal():
 
 
 if __name__ == "__main__":
+ 
     ventana_principal()
 
 

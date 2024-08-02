@@ -1,0 +1,31 @@
+{% extends 'animales/base.html' %}
+
+{% block title %}
+    Cargar Datos
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Cargar Datos</h5>
+                </div>
+                <div class="card-body">
+                    {% if inf is not none %}
+                        <div class="alert alert-success" role="alert">
+                            {{ inf }}
+                        </div>
+                    {% else %}
+                        <form method="post" class="d-flex flex-column align-items-center">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">Cargar</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

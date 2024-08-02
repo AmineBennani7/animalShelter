@@ -31,6 +31,10 @@ urlpatterns = [
     path('buscar_tipo_tamano/', main_views.buscar_tipo_tamano, name='buscar_tipo_tamano'),
     path('buscar_rango_edades/', main_views.buscar_rango_edades, name='buscar_rango_edades'),
     path('buscar_avanzado/', main_views.buscar_avanzado, name='buscar_avanzado'),
+    path('load_data/', main_views.load_data, name='load_data'),
+    
+    
+
 ]
 
 

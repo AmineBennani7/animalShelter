@@ -1,35 +1,76 @@
 from django.db.models import Q
+from django.http import HttpResponse
+
+from .management.commands.scraping_django import almacenar_datos
 from .models import Animal
 from django.shortcuts import render, redirect, get_object_or_404
+from whoosh.index import open_dir
+from whoosh.qparser import MultifieldParser
+from whoosh.qparser import QueryParser
+from whoosh.index import open_dir
+
+
+
+
+def load_data(request):
+    if request.method == 'POST':
+        almacenar_datos()
+        return HttpResponse("Datos cargados exitosamente")
+    return render(request, 'animales/load_data.html')
 
 def index(request):
     return render(request, 'animales/index.html')
 
-def listar_todo(request):
-    animales = Animal.objects.all()
-    animales_unicos = eliminar_duplicados(animales)
 
-    
-    return render(request, 'animales/lista_animales.html', {'animales': animales_unicos})
+
+def listar_todo(request):
+    if request.method == "GET":
+        ix = open_dir("Index")
+        
+        # Obtener todos los documentos indexados
+        with ix.searcher() as searcher:
+            # Obtener todas las URLs de los documentos indexados
+            animales_urls = [doc['url_detalle'] for doc in searcher.documents()]
+
+
+        # Filtrar los animales de Django basados en las URLs obtenidas
+        animales = Animal.objects.filter(url_detalle__in=animales_urls)
+        animales_unicos = eliminar_duplicados(animales)
+
+
+
+        return render(request, 'animales/lista_animales.html', {'animales': animales_unicos})
+    else:
+        return render(request, 'animales/lista_animales.html', {'animales': []})
 
 
 def buscar_nombre_raza(request):
-    query = request.GET.get('query')
-    animales = Animal.objects.all()
+    if request.method == "GET":
+        query = request.GET.get('query')
+        
+        if query:
+            ix = open_dir("Index")
+            
+            # Parsear la consulta de búsqueda
+            animal_query = MultifieldParser(["nombre", "raza"], ix.schema).parse(query)
+            
+            with ix.searcher() as searcher:
+                # Realizar la búsqueda
+                results = searcher.search(animal_query, limit=None)
+                
+                # Convertir los resultados de la búsqueda de Whoosh en URLs de animales
+                animales_urls = [hit['url_detalle'] for hit in results]
+            
+            # Filtrar los animales de Django basados en las URLs obtenidas
+            animales = Animal.objects.filter(url_detalle__in=animales_urls)
+            
+            animales_unicos = eliminar_duplicados(animales)
 
-    if query:
-        animales = Animal.objects.filter(Q(nombre__icontains=query) | Q(raza__icontains=query))
-    
-    # Crear un diccionario para eliminar duplicados basados en url_detalle
-    animales_unicos = {}
-    for animal in animales:
-        if animal.url_detalle not in animales_unicos:
-            animales_unicos[animal.url_detalle] = animal
+            return render(request, 'animales/buscar_nombre_raza.html', {'animales': animales_unicos})
+        else:
+            return render(request, 'animales/buscar_nombre_raza.html', {'animales': []})
 
-    # Convertir el diccionario de nuevo a una lista
-    animales_unicos = list(animales_unicos.values())
-
-    return render(request, 'animales/buscar_nombre_raza.html', {'animales': animales_unicos})
+    return render(request, 'animales/buscar_nombre_raza.html', {'animales': []})
 
 
 
@@ -43,24 +84,20 @@ def eliminar_duplicados(animales):
     # Convertir el diccionario de nuevo a una lista
     return list(animales_unicos.values())
 
-def buscar_nombre_raza(request):
-    query = request.GET.get('query')
-    animales = Animal.objects.all()
 
-    if query:
-        animales = Animal.objects.filter(Q(nombre__icontains=query) | Q(raza__icontains=query))
-    
-    animales_unicos = eliminar_duplicados(animales)
-    return render(request, 'animales/buscar_nombre_raza.html', {'animales': animales_unicos})
 
 def buscar_genero(request):
     genero = request.GET.get('genero')
     if genero:
-        animales = Animal.objects.filter(genero=genero)
-
+        ix = open_dir("Index")
+        with ix.searcher() as searcher:
+            query = QueryParser('genero', ix.schema).parse(genero)
+            results = searcher.search(query, limit=None)
+            animales_urls = [hit['url_detalle'] for hit in results]
+        animales = Animal.objects.filter(url_detalle__in=animales_urls)
+        animales_unicos = eliminar_duplicados(animales)
     else:
-        animales = Animal.objects.none()
-    animales_unicos = eliminar_duplicados(animales)
+        animales_unicos = []
 
     return render(request, 'animales/buscar_genero.html', {'animales': animales_unicos})
 
@@ -68,42 +105,55 @@ def buscar_genero(request):
 def buscar_tipo(request):
     tipo = request.GET.get('tipo')
     if tipo:
-        animales = Animal.objects.filter(tipo=tipo)
-
+        ix = open_dir("Index")
+        with ix.searcher() as searcher:
+            query = QueryParser('tipo', ix.schema).parse(tipo)
+            results = searcher.search(query, limit=None)
+            animales_urls = [hit['url_detalle'] for hit in results]
+        animales = Animal.objects.filter(url_detalle__in=animales_urls)
+        animales_unicos = eliminar_duplicados(animales)
     else:
-        animales = Animal.objects.none()
-    
-    animales_unicos = eliminar_duplicados(animales)
+        animales_unicos = []
+
     return render(request, 'animales/buscar_tipo.html', {'animales': animales_unicos})
 
 def buscar_tamano(request):
-    # Obtener todos los tamaños únicos de la base de datos
-    tamanos = Animal.objects.values_list('tamano', flat=True).distinct()
-    
-    # Si se recibe un tamaño seleccionado en el formulario
-    tamano_seleccionado = request.GET.get('tamano')
-    if tamano_seleccionado:
-        animales = Animal.objects.filter(tamano=tamano_seleccionado)
-    else:
-        animales = Animal.objects.none()
-    animales_unicos = eliminar_duplicados(animales)
+    # Obtener todos los tamaños únicos disponibles en la base de datos de Whoosh
+    ix = open_dir("Index")
+    with ix.searcher() as searcher:
+        unique_sizes = [size.decode('utf-8') for size in searcher.lexicon('tamano')]
 
-    
-    return render(request, 'animales/buscar_tamano.html', {'animales': animales_unicos, 'tamanos': tamanos, 'tamano_seleccionado': tamano_seleccionado})
+    tamano = request.GET.get('tamano')
+    animales_unicos = []
+
+    if tamano:
+        with ix.searcher() as searcher:
+            query = QueryParser('tamano', ix.schema).parse(tamano)
+            results = searcher.search(query, limit=None)
+            animales_urls = [hit['url_detalle'] for hit in results]
+            animales = Animal.objects.filter(url_detalle__in=animales_urls)
+            animales_unicos = eliminar_duplicados(animales)
+
+    return render(request, 'animales/buscar_tamano.html', {'animales': animales_unicos, 'tamanos': unique_sizes})
+
 
 def buscar_tipo_tamano(request):
-    # Obtener todos los tamaños únicos de la base de datos
-    tamanos = Animal.objects.values_list('tamano', flat=True).distinct()
-    
     tipo = request.GET.get('tipo')
     tamano = request.GET.get('tamano')
     if tipo and tamano:
-        animales = Animal.objects.filter(tipo=tipo, tamano=tamano)
+        ix = open_dir("Index")
+        with ix.searcher() as searcher:
+            query_tipo = QueryParser('tipo', ix.schema).parse(tipo)
+            results_tipo = searcher.search(query_tipo, limit=None)
+            query_tamano = QueryParser('tamano', ix.schema).parse(tamano)
+            results_tamano = searcher.search(query_tamano, limit=None)
+            animales_urls = [hit['url_detalle'] for hit in results_tipo if hit['url_detalle'] in [hit['url_detalle'] for hit in results_tamano]]
+        animales = Animal.objects.filter(url_detalle__in=animales_urls)
+        animales_unicos = eliminar_duplicados(animales)
     else:
-        animales = Animal.objects.none()
-    animales_unicos = eliminar_duplicados(animales)
+        animales_unicos = []
 
-    return render(request, 'animales/buscar_tipo_tamano.html', {'animales': animales_unicos, 'tamanos': tamanos, 'tipo_seleccionado': tipo, 'tamano_seleccionado': tamano})
+    return render(request, 'animales/buscar_tipo_tamano.html', {'animales': animales_unicos})
 
 def buscar_rango_edades(request):
     edad_min = request.GET.get('edad_min')

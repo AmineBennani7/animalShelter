@@ -16,40 +16,39 @@
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
+                <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'listar_todo' %}">Listar Todos</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'buscar_nombre_raza' %}">Buscar por Nombre o Raza</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Búsquedas
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="searchDropdown">
+                            <a class="dropdown-item" href="{% url 'buscar_nombre_raza' %}">Buscar por Nombre o Raza</a>
+                            <a class="dropdown-item" href="{% url 'buscar_genero' %}">Buscar por Género</a>
+                            <a class="dropdown-item" href="{% url 'buscar_tipo' %}">Buscar por Tipo</a>
+                            <a class="dropdown-item" href="{% url 'buscar_tamano' %}">Buscar por Tamaño</a>
+                            <a class="dropdown-item" href="{% url 'buscar_tipo_tamano' %}">Buscar por Tipo y Tamaño</a>
+                            <a class="dropdown-item" href="{% url 'buscar_rango_edades' %}">Buscar por Rango de Edades</a>
+                            <a class="dropdown-item" href="{% url 'buscar_avanzado' %}">Búsqueda Avanzada</a>
+                        </div>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'buscar_genero' %}">Buscar por Género</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'buscar_tipo' %}">Buscar por Tipo</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'buscar_tamano' %}">Buscar por Tamaño</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'buscar_tipo_tamano' %}">Buscar por Tipo y Tamaño</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'buscar_rango_edades' %}">Buscar por Rango de Edades</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'buscar_avanzado' %}">Búsqueda Avanzada</a>
+                        <a class="nav-link" href="{% url 'load_data' %}">Cargar Datos</a>
                     </li>
                 </ul>
             </div>
         </nav>
     </header>
+    
     <main class="container mt-5">
         {% block content %}
         {% endblock %}
     </main>
+    
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
