@@ -1,6 +1,6 @@
-# PETFINDER Project
+# ANIMALSHELTER Project
 
-The PETFINDER project aims to facilitate the adoption of shelter animals by creating a centralized web platform. To simplify the search process and promote responsible pet adoption, this project uses web scraping techniques to collect information from various animal shelter websites and present it in a unified location.
+The ANIMALSHELTER project aims to facilitate the adoption of shelter animals by creating a centralized web platform. To simplify the search process and promote responsible pet adoption, this project uses web scraping techniques to collect information from various animal shelter websites and present it in a unified location.
 
 Key technologies used include:
 - **Django:** A Python web development framework that provides a flexible environment for building web applications.
