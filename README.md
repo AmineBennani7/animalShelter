@@ -29,14 +29,18 @@ SQLite is used to manage and store both the scraped animal data and user interac
 
 ## Usage
 
+
 ### Homepage
 Upon visiting the homepage, users will see a welcome message and navigation options for various operations.
+![Homepage](images/inicio.png)
 
 ### Data Loading Page
 This page allows you to load all extracted data from the web scraping process into the SQLite database.
+![Data Loading](images/cargar.png)
 
 ### List All
 Displays a list of all animals in the SQLite database with their respective information. The list is generated using Whoosh operations.
+![List All](images/listar_todo.png)
 
 ### Search Section
 Provides various search options to find animals in the database based on different criteria, including:
@@ -47,6 +51,10 @@ Provides various search options to find animals in the database based on differe
 - Search by Type and Size
 - Search by Age Range
 - Advanced Search
+
+![Search by Gender](images/busq_genero.png)
+![Advanced Search](images/busq_avanzada.png)
+
 
 ## Installation
 
